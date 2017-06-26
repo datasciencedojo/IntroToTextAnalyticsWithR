@@ -31,7 +31,7 @@ install.packages(c("ggplot2", "e1071", "caret", "quanteda",
 
 
 # Load up the .CSV data and explore in RStudio.
-spam.raw <- read.csv("spam.csv", stringsAsFactors = FALSE)
+spam.raw <- read.csv("spam.csv", stringsAsFactors = FALSE, fileEncoding = "latin1")
 View(spam.raw)
 
 
