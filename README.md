@@ -6,3 +6,5 @@ Public repo for the Data Science Dojo YouTube tutorial series [Introduction to T
 - [Introduction to Text Analytics with R - Part 2](https://www.youtube.com/watch?v=Y7385dGRNLM)
 - [Introduction to Text Analytics with R - Part 3](https://www.youtube.com/watch?v=CQsyVDxK7_g)
 - [Introduction to Text Analytics with R - Part 4](https://www.youtube.com/watch?v=IFhDlHKRHno)
+- [Introduction to Text Analytics with R - Part 5](https://www.youtube.com/watch?v=az7yf0IfWPM)
+
