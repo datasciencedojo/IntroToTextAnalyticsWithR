@@ -25,7 +25,7 @@
 
 # Install all required packages.
 install.packages(c("ggplot2", "e1071", "caret", "quanteda", 
-                   "irlba", "randomForest"))
+                   "irlba", "randomForest")) 
 
 
 
