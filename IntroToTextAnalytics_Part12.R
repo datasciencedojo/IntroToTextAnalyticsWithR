@@ -648,24 +648,24 @@ ggplot(train.svd, aes(x = SpamSimilarity, fill = Label)) +
 # Perform another CV process using the new spam cosine similarity feature.
 
 # Create a cluster to work on 10 logical cores.
-cl <- makeCluster(10, type = "SOCK")
-registerDoSNOW(cl)
+# cl <- makeCluster(10, type = "SOCK")
+# registerDoSNOW(cl)
 
 # Time the code execution
-start.time <- Sys.time()
+# start.time <- Sys.time()
  
 # Re-run the training process with the additional feature.
-set.seed(932847)
-rf.cv.3 <- train(Label ~ ., data = train.svd, method = "rf",
-                trControl = cv.cntrl, tuneLength = 7,
-                importance = TRUE)
+# set.seed(932847)
+# rf.cv.3 <- train(Label ~ ., data = train.svd, method = "rf",
+#                 trControl = cv.cntrl, tuneLength = 7,
+#                 importance = TRUE)
 
 # Processing is done, stop cluster.
-stopCluster(cl)
+# stopCluster(cl)
 
 # Total time of execution on workstation was 
-total.time <- Sys.time() - start.time
-total.time
+# total.time <- Sys.time() - start.time
+# total.time
 
 
 # Load results from disk.
@@ -727,7 +727,8 @@ test.tokens.dfm
 #        contain n-grams that did not exist in the original training
 #        data. As such, we need to strip those n-grams out.
 #
-test.tokens.dfm <- dfm_select(test.tokens.dfm, features = train.tokens.dfm)
+test.tokens.dfm <- dfm_select(test.tokens.dfm, pattern = train.tokens.dfm,
+                              selection = "keep")
 test.tokens.matrix <- as.matrix(test.tokens.dfm)
 test.tokens.dfm
 
@@ -780,9 +781,6 @@ test.similarities <- cosine(t(test.similarities))
 
 #
 # NOTE - The following code was updated post-video recoding due to a bug.
-#        As a result of the bug fix the generalization uplift from 
-#        removing spam similarities is not nearly as significant as depicted
-#        in the video series, but is still present. 
 #
 test.svd$SpamSimilarity <- rep(0.0, nrow(test.svd))
 spam.cols <- (nrow(test.svd) + 1):ncol(test.similarities)

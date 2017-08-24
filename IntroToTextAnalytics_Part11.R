@@ -653,7 +653,7 @@ ggplot(train.svd, aes(x = SpamSimilarity, fill = Label)) +
 
 # Time the code execution
 # start.time <- Sys.time()
- 
+
 # Re-run the training process with the additional feature.
 # set.seed(932847)
 # rf.cv.3 <- train(Label ~ ., data = train.svd, method = "rf",
@@ -727,7 +727,8 @@ test.tokens.dfm
 #        contain n-grams that did not exist in the original training
 #        data. As such, we need to strip those n-grams out.
 #
-test.tokens.dfm <- dfm_select(test.tokens.dfm, features = train.tokens.dfm)
+test.tokens.dfm <- dfm_select(test.tokens.dfm, pattern = train.tokens.dfm,
+                              selection = "keep")
 test.tokens.matrix <- as.matrix(test.tokens.dfm)
 test.tokens.dfm
 
@@ -766,8 +767,6 @@ summary(test.tokens.tfidf[1,])
 test.svd.raw <- t(sigma.inverse * u.transpose %*% t(test.tokens.tfidf))
 
 
-
-
 # Lastly, we can now build the test data frame to feed into our trained
 # machine learning model for predictions. First up, add Label and TextLength.
 test.svd <- data.frame(Label = test$Label, test.svd.raw, 
@@ -782,9 +781,6 @@ test.similarities <- cosine(t(test.similarities))
 
 #
 # NOTE - The following code was updated post-video recoding due to a bug.
-#        As a result of the bug fix the generalization uplift from 
-#        removing spam similarities is not nearly as significant as depicted
-#        in the video series, but is still present. 
 #
 test.svd$SpamSimilarity <- rep(0.0, nrow(test.svd))
 spam.cols <- (nrow(test.svd) + 1):ncol(test.similarities)
@@ -804,6 +800,6 @@ test.svd$SpamSimilarity[!is.finite(test.svd$SpamSimilarity)] <- 0
 # random forest.
 preds <- predict(rf.cv.3, test.svd)
 
+
 # Drill-in on results
 confusionMatrix(preds, test.svd$Label)
-
