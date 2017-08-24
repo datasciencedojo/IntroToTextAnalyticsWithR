@@ -648,23 +648,24 @@ ggplot(train.svd, aes(x = SpamSimilarity, fill = Label)) +
 # Perform another CV process using the new spam cosine similarity feature.
 
 # Create a cluster to work on 10 logical cores.
-# cl <- makeCluster(10, type = "SOCK")
-# registerDoSNOW(cl)
+cl <- makeCluster(10, type = "SOCK")
+registerDoSNOW(cl)
 
 # Time the code execution
-# start.time <- Sys.time()
+start.time <- Sys.time()
  
 # Re-run the training process with the additional feature.
-# rf.cv.3 <- train(Label ~ ., data = train.svd, method = "rf",
-#                 trControl = cv.cntrl, tuneLength = 7,
-#                 importance = TRUE)
+set.seed(932847)
+rf.cv.3 <- train(Label ~ ., data = train.svd, method = "rf",
+                trControl = cv.cntrl, tuneLength = 7,
+                importance = TRUE)
 
 # Processing is done, stop cluster.
-# stopCluster(cl)
+stopCluster(cl)
 
 # Total time of execution on workstation was 
-# total.time <- Sys.time() - start.time
-# total.time
+total.time <- Sys.time() - start.time
+total.time
 
 
 # Load results from disk.
@@ -765,8 +766,6 @@ summary(test.tokens.tfidf[1,])
 test.svd.raw <- t(sigma.inverse * u.transpose %*% t(test.tokens.tfidf))
 
 
-
-
 # Lastly, we can now build the test data frame to feed into our trained
 # machine learning model for predictions. First up, add Label and TextLength.
 test.svd <- data.frame(Label = test$Label, test.svd.raw, 
@@ -778,16 +777,31 @@ test.svd <- data.frame(Label = test$Label, test.svd.raw,
 test.similarities <- rbind(test.svd.raw, train.irlba$v[spam.indexes,])
 test.similarities <- cosine(t(test.similarities))
 
+
+#
+# NOTE - The following code was updated post-video recoding due to a bug.
+#        As a result of the bug fix the generalization uplift from 
+#        removing spam similarities is not nearly as significant as depicted
+#        in the video series, but is still present. 
+#
 test.svd$SpamSimilarity <- rep(0.0, nrow(test.svd))
 spam.cols <- (nrow(test.svd) + 1):ncol(test.similarities)
 for(i in 1:nrow(test.svd)) {
-  test.svd$SpamSimilarity[i] <- mean(train.similarities[i, spam.cols])  
+  # The following line has the bug fix.
+  test.svd$SpamSimilarity[i] <- mean(test.similarities[i, spam.cols])  
 }
+
+
+# Some SMS text messages become empty as a result of stopword and special 
+# character removal. This results in spam similarity measures of 0. Correct.
+# This code as added post-video as part of the bug fix.
+test.svd$SpamSimilarity[!is.finite(test.svd$SpamSimilarity)] <- 0
 
 
 # Now we can make predictions on the test data set using our trained mighty 
 # random forest.
 preds <- predict(rf.cv.3, test.svd)
+
 
 # Drill-in on results
 confusionMatrix(preds, test.svd$Label)
@@ -805,22 +819,24 @@ confusionMatrix(preds, test.svd$Label)
 train.svd$SpamSimilarity <- NULL
 test.svd$SpamSimilarity <- NULL
 
-# # Create a cluster to work on 10 logical cores.
+
+# Create a cluster to work on 10 logical cores.
 # cl <- makeCluster(10, type = "SOCK")
 # registerDoSNOW(cl)
-# 
-# # Time the code execution
+
+# Time the code execution
 # start.time <- Sys.time()
-# 
-# # Re-run the training process with the additional feature.
+
+# Re-run the training process with the additional feature.
+# set.seed(254812)
 # rf.cv.4 <- train(Label ~ ., data = train.svd, method = "rf",
 #                  trControl = cv.cntrl, tuneLength = 7,
 #                  importance = TRUE)
-# 
-# # Processing is done, stop cluster.
+
+# Processing is done, stop cluster.
 # stopCluster(cl)
-# 
-# # Total time of execution on workstation was
+
+# Total time of execution on workstation was
 # total.time <- Sys.time() - start.time
 # total.time
 

@@ -655,6 +655,7 @@ ggplot(train.svd, aes(x = SpamSimilarity, fill = Label)) +
 # start.time <- Sys.time()
  
 # Re-run the training process with the additional feature.
+# set.seed(932847)
 # rf.cv.3 <- train(Label ~ ., data = train.svd, method = "rf",
 #                 trControl = cv.cntrl, tuneLength = 7,
 #                 importance = TRUE)
@@ -778,11 +779,25 @@ test.svd <- data.frame(Label = test$Label, test.svd.raw,
 test.similarities <- rbind(test.svd.raw, train.irlba$v[spam.indexes,])
 test.similarities <- cosine(t(test.similarities))
 
+
+#
+# NOTE - The following code was updated post-video recoding due to a bug.
+#        As a result of the bug fix the generalization uplift from 
+#        removing spam similarities is not nearly as significant as depicted
+#        in the video series, but is still present. 
+#
 test.svd$SpamSimilarity <- rep(0.0, nrow(test.svd))
 spam.cols <- (nrow(test.svd) + 1):ncol(test.similarities)
 for(i in 1:nrow(test.svd)) {
-  test.svd$SpamSimilarity[i] <- mean(train.similarities[i, spam.cols])  
+  # The following line has the bug fix.
+  test.svd$SpamSimilarity[i] <- mean(test.similarities[i, spam.cols])  
 }
+
+
+# Some SMS text messages become empty as a result of stopword and special 
+# character removal. This results in spam similarity measures of 0. Correct.
+# This code as added post-video as part of the bug fix.
+test.svd$SpamSimilarity[!is.finite(test.svd$SpamSimilarity)] <- 0
 
 
 # Now we can make predictions on the test data set using our trained mighty 
