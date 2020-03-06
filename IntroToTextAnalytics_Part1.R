@@ -19,7 +19,7 @@
 # This R source code file corresponds to video 1 of the Data Science
 # Dojo YouTube series "Introduction to Text Analytics with R" located 
 # at the following URL:
-#     <YouTube Video Link Here />     
+#     https://www.youtube.com/watch?v=4vuw0AsHeGw   
 #
 
 
